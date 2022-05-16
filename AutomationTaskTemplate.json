@@ -1,0 +1,127 @@
+{
+    "id": "MALWARE_ANALYSIS_LOGIC_APPS",
+    "title": "MALWARE ANALYSIS LOGIC APPS",
+    "description": "MALWARE ANALYSIS LOGIC APPS",
+    "iconType": "Event",
+    "skuType": "Consumption",
+    "data": {
+        "definition": {
+            "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {
+                "$connections": {
+                    "defaultValue": {},
+                    "type": "Object"
+                }
+            },
+            "triggers": {
+                "Microsoft_Sentinel_alert": {
+                    "type": "ApiConnectionWebhook",
+                    "inputs": {
+                        "body": {
+                            "callback_url": "@{listCallbackUrl()}"
+                        },
+                        "host": {
+                            "connection": {
+                                "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                            }
+                        },
+                        "path": "/subscribe"
+                    }
+                }
+            },
+            "actions": {
+                "Create_Record": {
+                    "runAfter": {},
+                    "type": "ApiConnection",
+                    "inputs": {
+                        "body": {
+                            "description": "MALWARE ANALYSIS THREAT DETECT@{triggerBody()?['ProductName']}"
+                        },
+                        "host": {
+                            "connection": {
+                                "name": "@parameters('$connections')['service-now']['connectionId']"
+                            }
+                        },
+                        "method": "post",
+                        "path": "/api/now/v2/table/@{encodeURIComponent('incident')}",
+                        "queries": {
+                            "sysparm_display_value": false,
+                            "sysparm_exclude_reference_link": true
+                        }
+                    }
+                },
+                "Post_message_in_a_chat_or_channel": {
+                    "runAfter": {
+                        "Create_Record": [
+                            "Succeeded"
+                        ]
+                    },
+                    "type": "ApiConnection",
+                    "inputs": {
+                        "body": {
+                            "messageBody": "<p>HI TEAM,<br>\n<br>\nMALWARE ANALYSIS THREAT DETECT.<br>\nServiceNow-@{body('Create_Record')?['result']?['number']}<br>\n@{triggerBody()?['AlertDisplayName']}@{triggerBody()?['ProductName']}@{triggerBody()?['Severity']}@{triggerBody()?['AlertType']}<br>\n<br>\nTHANKS,<br>\nDEEPAN.</p>",
+                            "recipient": {
+                                "channelId": "19:42d86ac553dd4be4a3ff174e88232857@thread.tacv2",
+                                "groupId": "f43f002e-9270-4e7a-9594-2e9ee8a2e94c"
+                            }
+                        },
+                        "host": {
+                            "connection": {
+                                "name": "@parameters('$connections')['teams_1']['connectionId']"
+                            }
+                        },
+                        "method": "post",
+                        "path": "/beta/teams/conversation/message/poster/@{encodeURIComponent('User')}/location/@{encodeURIComponent('Channel')}"
+                    }
+                },
+                "Send_an_email_(V2)": {
+                    "runAfter": {
+                        "Post_message_in_a_chat_or_channel": [
+                            "Succeeded"
+                        ]
+                    },
+                    "type": "ApiConnection",
+                    "inputs": {
+                        "body": {
+                            "Body": "<p>HI TEAM,<br>\n<br>\nMALWARE ANALYSIS THREAT DETECT <br>\nTHANKS,<br>\nDEEPAN.</p>",
+                            "Subject": "@{body('Create_Record')?['result']?['number']}@{triggerBody()?['AlertDisplayName']}@{triggerBody()?['Description']}@{triggerBody()?['Severity']}@{triggerBody()?['ProductName']}",
+                            "To": "twilightcloudcoderz@gmail.com\n"
+                        },
+                        "host": {
+                            "connection": {
+                                "name": "@parameters('$connections')['office365']['connectionId']"
+                            }
+                        },
+                        "method": "post",
+                        "path": "/v2/Mail"
+                    }
+                }
+            },
+            "outputs": {}
+        },
+        "parameters": {},
+        "connections": {
+            "azuresentinel": {
+                "id": "/subscriptions/0000-0000/providers/Microsoft.Web/locations/eastus2/managedApis/azuresentinel",
+                "connectionId": "",
+                "connectionName": ""
+            },
+            "office365": {
+                "id": "/subscriptions/0000-0000/providers/Microsoft.Web/locations/eastus2/managedApis/office365",
+                "connectionId": "",
+                "connectionName": ""
+            },
+            "service-now": {
+                "id": "/subscriptions/0000-0000/providers/Microsoft.Web/locations/eastus2/managedApis/service-now",
+                "connectionId": "",
+                "connectionName": ""
+            },
+            "teams_1": {
+                "id": "/subscriptions/0000-0000/providers/Microsoft.Web/locations/eastus2/managedApis/teams",
+                "connectionId": "",
+                "connectionName": ""
+            }
+        }
+    }
+}

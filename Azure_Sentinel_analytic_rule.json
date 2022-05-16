@@ -1,0 +1,68 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/ad8fbe10-f289-41e7-a580-46cc87b256cf')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/ad8fbe10-f289-41e7-a580-46cc87b256cf')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-10-01-preview",
+            "properties": {
+                "displayName": "MALWARE ANALYSIS",
+                "description": "MALWARE",
+                "severity": "High",
+                "enabled": false,
+                "query": "ThreatIntelligenceIndicator\r\n| where Active == true\r\n| where isnotempty(FileHashValue)\r\n| extend ThreatIntelIOC = FileHashValue\r\n| extend PotentialMalware = Description\r\n|project TimeGenerated, PotentialMalware, ThreatType, ThreatIntelIOC, FileHashType, Type",
+                "queryFrequency": "PT5M",
+                "queryPeriod": "PT5H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT5H",
+                "suppressionEnabled": false,
+                "tactics": [],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": [],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "AlertPerResult"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null,
+                "sentinelEntitiesMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/ad8fbe10-f289-41e7-a580-46cc87b256cf/actions/5bd955fed45a43c58901991b50c17f0a')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/ad8fbe10-f289-41e7-a580-46cc87b256cf/5bd955fed45a43c58901991b50c17f0a')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules/actions",
+            "apiVersion": "2021-10-01-preview",
+            "properties": {
+                "ruleId": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/ad8fbe10-f289-41e7-a580-46cc87b256cf')]",
+                "triggerUri": "[listCallbackURL(concat('/subscriptions/9c9dde57-5b6f-45dc-aaf8-1ced277603ef/resourceGroups/sentinel/providers/Microsoft.Logic/workflows/MALWAR_ANLAYSIS','/triggers/Microsoft_Sentinel_alert'),'2016-06-01').value]",
+                "logicAppResourceId": "/subscriptions/9c9dde57-5b6f-45dc-aaf8-1ced277603ef/resourceGroups/sentinel/providers/Microsoft.Logic/workflows/MALWAR_ANLAYSIS",
+                "operatesOn": "Alert"
+            },
+            "dependsOn": [
+                "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/ad8fbe10-f289-41e7-a580-46cc87b256cf')]"
+            ]
+        }
+    ]
+}
