@@ -3,8 +3,13 @@ TWILIGHT MALWARE THREAT DETECTION
 ## Inspiration
 
 In modern world data is everything so in order to protect from attacker Microsoft and other cloud resources  build services with help of highly talented Associate. Inspired by Azure sentinel security features which secure AWS and GCP other cloud platforms.
+
  
+
 ## What it does
+
+![bg](https://github.com/TWILIGHTCLOUDCODERZ/TWILIGHTSENTINEL/assets/101945531/89a4a4fa-9e82-41f5-aafe-e2b6bda6fe1a)
+
 
 TWILIGHT MALWARE THREAT DETECTION SOLUTION:-
 
